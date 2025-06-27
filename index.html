@@ -1,1 +1,183 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Schnellwahl UI</title>
+  <style>
+    :root {
+      --swb-primary: #2563eb;
+      --swb-primary-hover: #1d4ed8;
+      --swb-gray: #e5e7eb;
+      --swb-text: #1f2937;
+      --swb-bg: #f9fafb;
+    }
 
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--swb-bg);
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #swb-container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+      width: 340px;
+      max-width: 95vw;
+      border: 1px solid var(--swb-gray);
+    }
+
+    .swb-section-title {
+      font-weight: 600;
+      margin: 12px 0 8px;
+      color: var(--swb-text);
+    }
+
+    table.swb-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+
+    .swb-table td {
+      padding: 4px;
+    }
+
+    .swb-btn {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--swb-gray);
+      background-color: #fff;
+      color: var(--swb-text);
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .swb-btn:hover {
+      background-color: var(--swb-gray);
+    }
+
+    .swb-btn.selected {
+      background-color: var(--swb-primary);
+      color: #fff;
+      border-color: var(--swb-primary-hover);
+    }
+
+    #swb-output {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      border: 1px solid var(--swb-gray);
+      border-radius: 6px;
+      font-size: 13px;
+      background-color: #f3f4f6;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="swb-container">
+
+    <div class="swb-section-title">Menge</div>
+    <table class="swb-table" id="swb-menge-table">
+      <tr>
+        <td><button class="swb-btn" id="swb-menge-1x" data-value="1x">1x</button></td>
+        <td><button class="swb-btn" id="swb-menge-2x" data-value="2x">2x</button></td>
+        <td><button class="swb-btn" id="swb-menge-5x" data-value="5x">5x</button></td>
+        <td><button class="swb-btn" id="swb-menge-10x" data-value="10x">10x</button></td>
+        <td><button class="swb-btn" id="swb-menge-20x" data-value="20x">20x</button></td>
+      </tr>
+    </table>
+
+    <div class="swb-section-title">Textblöcke</div>
+    <table class="swb-table" id="swb-textblock-table">
+      <tr>
+        <td><button class="swb-btn" id="swb-text-io" data-value="i.O.">i.O.</button></td>
+        <td><button class="swb-btn" id="swb-text-defekt" data-value="Defekt">Defekt</button></td>
+        <td><button class="swb-btn" id="swb-text-geo" data-value="geöffnet">geöffnet</button></td>
+      </tr>
+      <tr>
+        <td><button class="swb-btn" id="swb-text-austausch" data-value="Kunde wünscht Austausch">Austausch</button></td>
+        <td><button class="swb-btn" id="swb-text-falsch" data-value="Rücksendung Falschlieferung">Falschlieferung</button></td>
+        <td><button class="swb-btn" id="swb-text-blister" data-value="Blister beschädigt">Blister</button></td>
+      </tr>
+      <tr>
+        <td colspan="3"><button class="swb-btn" id="swb-text-siegel" data-value="Siegel geöffnet">Siegel geöffnet</button></td>
+      </tr>
+    </table>
+
+    <div class="swb-section-title">Teil</div>
+    <table class="swb-table" id="swb-teil-table">
+      <tr>
+        <td><button class="swb-btn" id="swb-teil-1" data-value="Teil 1/2">Teil 1/2</button></td>
+        <td><button class="swb-btn" id="swb-teil-2" data-value="Teil 2/2">Teil 2/2</button></td>
+      </tr>
+    </table>
+
+    <input type="text" id="swb-output" name="swb_schnellwahl_data" readonly placeholder="Auswahl..." />
+
+  </div>
+
+  <script>
+    const swbMengeTable = document.getElementById("swb-menge-table");
+    const swbTextblocksTable = document.getElementById("swb-textblock-table");
+    const swbTeilTable = document.getElementById("swb-teil-table");
+    const swbOutput = document.getElementById("swb-output");
+
+    let swbSelectedMenge = '';
+    let swbSelectedTextblocks = [];
+    let swbSelectedTeil = '';
+
+    function swbUpdateOutput() {
+      const result = `Menge: ${swbSelectedMenge || '-'} | Text: ${swbSelectedTextblocks.join(', ') || '-'} | Teil: ${swbSelectedTeil || '-'}`;
+      swbOutput.value = result;
+    }
+
+    swbMengeTable.addEventListener("click", (e) => {
+      if (e.target.classList.contains("swb-btn")) {
+        swbMengeTable.querySelectorAll(".swb-btn").forEach(btn => btn.classList.remove("selected"));
+        e.target.classList.add("selected");
+        swbSelectedMenge = e.target.dataset.value;
+        swbUpdateOutput();
+      }
+    });
+
+    swbTextblocksTable.addEventListener("click", (e) => {
+      if (e.target.classList.contains("swb-btn")) {
+        const val = e.target.dataset.value;
+        e.target.classList.toggle("selected");
+        if (swbSelectedTextblocks.includes(val)) {
+          swbSelectedTextblocks = swbSelectedTextblocks.filter(v => v !== val);
+        } else {
+          swbSelectedTextblocks.push(val);
+        }
+        swbUpdateOutput();
+      }
+    });
+
+    swbTeilTable.addEventListener("click", (e) => {
+      if (e.target.classList.contains("swb-btn")) {
+        swbTeilTable.querySelectorAll(".swb-btn").forEach(btn => btn.classList.remove("selected"));
+        e.target.classList.add("selected");
+        swbSelectedTeil = e.target.dataset.value;
+        swbUpdateOutput();
+      }
+    });
+  </script>
+
+</body>
+</html>
